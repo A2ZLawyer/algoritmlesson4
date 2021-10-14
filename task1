@@ -1,0 +1,92 @@
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Threading;
+
+namespace algoritmlesson4task1
+{
+    class MainClass
+    {
+        //создаю метод добавления элементов в массив по индексу
+        public static void Insert(ref string[] array, string Volume, int index)
+        {
+            string[] newarray = new string[array.Length + 1];
+            newarray[index] = Volume;
+            for (int i = 0; i < index; i++)
+            {
+                newarray[i] = array[i];
+            }
+            for (int i = index; i < array.Length; i++)
+            {
+                newarray[i + 1] = array[i];
+            }
+            array = newarray;
+        }
+
+            public static void Main(string[] args)
+        {
+            //создаем рандомный массив
+            Random r = new Random();
+            string[] strs = new string[1_000_000];
+            for (int i = 0; i < strs.Length; i++)
+            {
+                strs[i] = ((char)r.Next('a', 'z' + 1)).ToString();
+            }
+            Insert(ref strs, "z", 999_990);
+            Insert(ref strs, "a", 999_991);
+            Insert(ref strs, "p", 999_992);
+            Insert(ref strs, "s", 999_993);
+            Insert(ref strs, "e", 999_994);
+            Insert(ref strs, "a", 999_995);
+            Insert(ref strs, "r", 999_996);
+            Insert(ref strs, "c", 999_997);
+            Insert(ref strs, "h", 999_998);
+            //проверяю добавились ли значения в массив преобразуя массив в строку и выводя ее в консоль
+            string s = String.Concat(strs);
+            Console.WriteLine(s);
+            //конвертируем рандомный массив с дополненниями в HashSet
+            HashSet<string> myHash = strs.ToHashSet();
+            // задаем искомую строку
+            string searchstring = "zapsearch";
+            Stopwatch stopWatch = Stopwatch.StartNew();
+            //производим поиск по хешу
+            Thread.Sleep(5000); // проверил нигде ли не обшибся в stopwatch
+            foreach (var item in myHash)
+            {
+                if (item.Equals(searchstring))
+                {
+                    break;
+                }
+            }
+            stopWatch.Stop();
+            TimeSpan tsh = stopWatch.Elapsed;
+            string timeh = $"{tsh.Hours}:{tsh.Minutes}:{tsh.Seconds}:{tsh.Milliseconds}";
+            Console.WriteLine("Время выполнения поиска по hash: " + timeh);
+            Stopwatch stopWatch2 = Stopwatch.StartNew();
+            // производим поиск по массиву
+            foreach (var i in strs)
+            {
+                if (strs.Equals(searchstring))
+                {
+                    break;
+                }
+            }
+            stopWatch2.Stop();
+            TimeSpan tsa = stopWatch2.Elapsed;
+            string timea = $"{tsa.Hours}:{tsa.Minutes}:{tsa.Seconds}:{tsa.Milliseconds}";
+            Console.WriteLine("Время выполнения поиска в массиве: " + timea);
+            Stopwatch stopWatch3 = Stopwatch.StartNew();
+            //производим поиск по строке
+            if (s.Contains(searchstring))
+            {
+                Console.WriteLine("Строка найдена");
+            }
+            else Console.WriteLine("Строка не найдена");
+            stopWatch3.Stop();
+            TimeSpan tss = stopWatch3.Elapsed;
+            string timess = $"{tss.Hours}:{tss.Minutes}:{tss.Seconds}:{tss.Milliseconds}";
+            Console.WriteLine("Время выполнения поиска по строке: " + timess);
+        }
+    }
+}

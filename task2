@@ -1,0 +1,296 @@
+TreeNode.cs
+using System;
+namespace algoritmlesson4task22
+{
+    public enum NodeSide
+    {
+        Left,
+        Right
+    }
+    public class TreeNode
+    {
+
+        public int? Value { get; private set; }
+        public TreeNode Left { get; set; }
+        public TreeNode Right { get; set; }
+        public TreeNode Parent { get; set; }
+        // Вставляем значение в дерево
+        public void AddItem(int value)
+        {
+            if (Value == null || Value == value)
+            {
+                Value = value;
+                return;
+            }
+            if (Value > value)
+            {
+                if (Left == null) Left = new TreeNode();
+                AddItem(value, Left, this);
+            }
+            else
+            {
+                if (Right == null) Right = new TreeNode();
+                AddItem (value, Right, this);
+            }
+        }
+        // Вставляем значение в определённый узел дерева
+        private void AddItem(int value, TreeNode node, TreeNode parent)
+        {
+
+            if (node.Value == null || node.Value == value)
+            {
+                node.Value = value;
+                node.Parent = parent;
+                return;
+            }
+            if (node.Value > value)
+            {
+                if (node.Left == null) node.Left = new TreeNode();
+                AddItem(value, node.Left, node);
+            }
+            else
+            {
+                if (node.Right == null) node.Right = new TreeNode();
+                AddItem(value, node.Right, node);
+            }
+        }
+        // Уставляем узел в определённый узел дерева
+        private void AddItem(TreeNode value, TreeNode node, TreeNode parent)
+        {
+
+            if (node.Value == null || node.Value == value.Value)
+            {
+                node.Value = value.Value;
+                node.Left = value.Left;
+                node.Right = value.Right;
+                node.Parent = parent;
+                return;
+            }
+            if (node.Value > value.Value)
+            {
+                if (node.Left == null) node.Left = new TreeNode();
+                AddItem(value, node.Left, node);
+            }
+            else
+            {
+                if (node.Right == null) node.Right = new TreeNode();
+                AddItem(value, node.Right, node);
+            }
+        }
+        // Определяем, в какой ветви для родительского лежит данный узел
+        private NodeSide? MeForParent(TreeNode node)
+        {
+            if (node.Parent == null) return null;
+            if (node.Parent.Left == node) return NodeSide.Left;
+            if (node.Parent.Right == node) return NodeSide.Right;
+            return null;
+        }
+        // Удаляем узел из дерева
+        public void RemoveItem(TreeNode node)
+        {
+            if (node == null)
+            {
+                return;
+            }
+            var me = MeForParent(node);
+            // Если у узла нет дочерних элементов, то удаляем без дополнительных действий
+            if (node.Left == null && node.Right == null)
+            {
+                if (me == NodeSide.Left)
+                {
+                    node.Parent.Left = null;
+                }
+                else
+                {
+                    node.Parent.Right = null;
+                }
+                return;
+            }
+            // Если нет левого дочернего, то правый дочерний ставим на место удаляемого
+            if (node.Left == null)
+            {
+                if (me == NodeSide.Left)
+                {
+                    node.Parent.Left = node.Right;
+                }
+                else
+                {
+                    node.Parent.Right = node.Right;
+                }
+
+                node.Right.Parent = node.Parent;
+                return;
+            }
+            //Если нет правого дочернего, то левый дочерний ставим на место удаляемого
+            if (node.Right == null)
+            {
+                if (me == NodeSide.Left)
+                {
+                    node.Parent.Left = node.Left;
+                }
+                else
+                {
+                    node.Parent.Right = node.Left;
+                }
+
+                node.Left.Parent = node.Parent;
+                return;
+            }
+
+            //Если присутствуют оба дочерних узла
+            //то правый ставим на место удаляемого
+            //а левый вставляем в правый
+
+            if (me == NodeSide.Left)
+            {
+                node.Parent.Left = node.Right;
+            }
+            if (me == NodeSide.Right)
+            {
+                node.Parent.Right = node.Right;
+            }
+            if (me == null)
+            {
+                var bufLeft = node.Left;
+                var bufRightLeft = node.Right.Left;
+                var bufRightRight = node.Right.Right;
+                node.Value = node.Right.Value;
+                node.Right = bufRightRight;
+                node.Left = bufRightLeft;
+                AddItem(bufLeft, node, node);
+            }
+            else
+            {
+                node.Right.Parent = node.Parent;
+                AddItem(node.Left, node.Right, node.Right);
+            }
+        }
+        // Удаляем значение из дерева
+        public void RemoveItem(int value)
+        {
+            var removeNode = GetNodeByValue(value);
+            if (removeNode != null)
+            {
+                RemoveItem(removeNode);
+            }
+        }
+        // Ищем узел с заданным значением
+        public TreeNode GetNodeByValue(int value)
+        {
+            if (Value == value)
+            {
+                return this;
+            }
+            if (Value > value)
+            {
+                return GetNodeByValue(value, Left);
+            }
+            return GetNodeByValue(value, Right);
+        }
+        // Ищем значение в определённом узле
+        public TreeNode GetNodeByValue(int value, TreeNode node)
+        {
+            if (node == null)
+            {
+                return null;
+            }
+
+            if (node.Value == value)
+            {
+                return node;
+            }
+            if (node.Value > value)
+            {
+                return GetNodeByValue(value, node.Left);
+            }
+            return GetNodeByValue(value, node.Right);
+        }
+        // Возвращаем количество элементов в дереве
+        public int CountElements()
+        {
+            return CountElements(this);
+        }
+        // Возвращаем количество элементов в определённом узле
+        private int CountElements(TreeNode node)
+        {
+            int count = 1;
+            if (node.Right != null)
+            {
+                count += CountElements(node.Right);
+            }
+            if (node.Left != null)
+            {
+                count += CountElements(node.Left);
+            }
+            return count;
+        }
+    }
+
+    public class TreeNodeExtensions
+    {
+        public static void PrintTree(TreeNode node)
+        {
+            if (node != null)
+            {
+                if (node.Parent == null)
+                {
+                    Console.WriteLine("Корень:({0})", node.Value);
+                }
+                else
+                {
+                    if (node.Parent.Left == node)
+                    {
+                        Console.WriteLine("Слева от ({1}) - ({0})", node.Value, node.Parent.Value);
+                    }
+
+                    if (node.Parent.Right == node)
+                    {
+                        Console.WriteLine("Справа от ({1}) - ({0})", node.Value, node.Parent.Value);
+                    }
+                }
+                if (node.Left != null)
+                {
+                    PrintTree(node.Left);
+                }
+                if (node.Right != null)
+                {
+                    PrintTree(node.Right);
+                }
+            }
+        }
+    }
+}
+Program.cs
+using System;
+
+namespace algoritmlesson4task22
+{
+    class Program
+    {
+        static void Main()
+        {
+            //          ____(6)____
+            //         /		               \
+            //      (2)	                       (11)
+            //          \		                /      \
+            //          (3)	              (9)	     (30)
+
+            TreeNode tree = new TreeNode();
+            tree.AddItem(6);
+            tree.AddItem(2);
+            tree.AddItem(3);
+            tree.AddItem(11);
+            tree.AddItem(9);
+            tree.AddItem(30);
+            tree.AddItem(31);
+            tree.AddItem(32);
+            tree.AddItem(33);
+            TreeNodeExtensions.PrintTree(tree);
+            tree.RemoveItem(31);
+            tree.RemoveItem(32);
+            tree.RemoveItem(33);
+            TreeNodeExtensions.PrintTree(tree);
+            tree.GetNodeByValue(11);
+        }
+    }
+}
